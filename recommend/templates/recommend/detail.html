@@ -1,0 +1,137 @@
+{% extends 'recommend/base.html'%}
+{% block title %}{{movies.title}}{% endblock %}
+
+{% block body %}
+<style>
+    body {
+        background: linear-gradient(135deg, #0f0f0f, #1c1c1c);
+        color: #f5f5f5;
+        font-family: "Poppins", sans-serif;
+    }
+
+    .movie-card {
+        display: flex;
+        align-items: flex-start;
+        gap: 30px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+        transition: transform 0.3s;
+    }
+    .movie-card:hover {
+        transform: scale(1.02);
+    }
+
+    .movie-card img {
+        width: 260px;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+    }
+
+    .movie-info h1 {
+        font-size: 2.2rem;
+        font-weight: bold;
+        margin-bottom: 10px;
+    }
+    .movie-info small {
+        font-size: 1rem;
+        color: #ccc;
+    }
+
+    /* Star rating */
+    .star-rating {
+        font-size: 1.8rem;
+        margin: 15px 0;
+        color: #555;
+        cursor: pointer;
+    }
+    .star-rating .fa {
+        transition: color 0.3s, transform 0.2s;
+    }
+    .star-rating .fa:hover,
+    .star-rating .fa.active {
+        color: #ffcc00;
+        transform: scale(1.2);
+    }
+
+    /* Buttons */
+    .button {
+        background: #ff0057;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        margin-top: 15px;
+        border-radius: 30px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+    .button:hover {
+        background: #ff3366;
+        box-shadow: 0 5px 15px rgba(255,0,87,0.5);
+    }
+
+    .messages .alert {
+        margin-bottom: 20px;
+        border-radius: 10px;
+    }
+</style>
+
+<div class="container mt-5">
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <div class="alert alert-success text-center">
+                  <strong>✔</strong> {{message}}
+                </div>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <div class="movie-card">
+        <!-- Movie Poster -->
+        <img src="{{ movies.movie_logo.url }}" alt="{{ movies.title }} Poster">
+
+        <!-- Movie Info -->
+        <div class="movie-info">
+            <h1>{{ movies.title }}</h1>
+            <h3><small>Genre: {{ movies.genre }}</small></h3>
+
+            <!-- Rating Form -->
+            <form method="post" action="{% url 'detail' movies.id %}" onsubmit="return validateForm()" name="ratingForm">
+                <div class="star-rating">
+                    <span>Rate Movie:</span><br>
+                    <span class="fa fa-star-o" data-rating="1"></span>
+                    <span class="fa fa-star-o" data-rating="2"></span>
+                    <span class="fa fa-star-o" data-rating="3"></span>
+                    <span class="fa fa-star-o" data-rating="4"></span>
+                    <span class="fa fa-star-o" data-rating="5"></span>
+                    {% if rate_flag %}
+                        <input type="hidden" name="rating" class="rating-value" value="{{movie_rating}}">
+                    {% else %}
+                        <input type="hidden" name="rating" class="rating-value" value="0">
+                    {% endif %}
+                    {% csrf_token %}
+                </div>
+                <input type="submit" class="button" value="Submit">
+            </form>
+
+            <!-- Watchlist Form -->
+            <form method="post" action="{% url 'detail' movies.id %}">
+                {% csrf_token %}
+                <div class="mt-3">
+                    <label>
+                        <input type="checkbox" name="watch" {% if update %}checked{% endif %}> Add to my list
+                    </label><br>
+                    {% if update %}
+                        <input type="submit" class="button" value="Remove" name="watch">
+                    {% else %}
+                        <input type="submit" class="button" value="Add">
+                    {% endif %}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

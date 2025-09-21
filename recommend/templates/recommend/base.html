@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Movies{% endblock title %}</title>
+  {% load static %}
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Poppins", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #fff;
+      display: flex;
+      min-height: 100vh;
+    }
+
+  .img-responsive  {
+    width: 100%;
+  max-width: 500px;   /* adjust to your preference */
+  height: 300px;      /* fixed height for uniform look */
+  object-fit: cover;  /* crops neatly without distortion */
+  border-radius: 22px;
+  margin: 0 auto;
+
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: #111827;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 4px 0 15px rgba(0,0,0,0.6);
+      border-right: 2px solid #22c55e33;
+    }
+
+    .brand {
+      font-weight: bold;
+      font-size: 20px;
+      color: #22c55e;
+      margin-bottom: 35px;
+      text-decoration: none;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .brand::before {
+      content: "\f008"; /* Film icon */
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+    }
+
+    .menu {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      flex: 1;
+    }
+
+    .menu li {
+      margin: 10px 0;
+    }
+
+    .menu a {
+      color: #94a3b8;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      font-size: 15px;
+    }
+
+    .menu a i {
+      width: 20px;
+      text-align: center;
+    }
+
+    .menu a:hover {
+      background: rgba(34, 197, 94, 0.1);
+      color: #22c55e;
+      transform: translateX(5px);
+    }
+
+    /* Main content */
+    .main-content {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(12px);
+      border-radius: 20px 0 0 20px;
+    }
+
+    .main-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .main-header h1 {
+      font-size: 28px;
+      color: #22c55e;
+      margin: 0;
+    }
+
+    /* Search form */
+    .search-form {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .search-form input,
+    .search-form select,
+    .search-form button {
+      padding: 6px 10px;
+      border-radius: 6px;
+      border: none;
+      outline: none;
+    }
+
+    .search-form input {
+      flex: 1;
+    }
+
+    .search-form button {
+      background: #22c55e;
+      color: #fff;
+      cursor: pointer;
+    }
+
+    .search-form button:hover {
+      background: #16a34a;
+    }
+
+    /* Card style */
+    .card {
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+      transition: transform 0.3s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-5px) scale(1.02);
+    }
+
+    footer {
+      background-color: #1e293b;
+      padding: 20px;
+      text-align: center;
+      margin-top: 40px;
+      border-radius: 12px;
+      font-size: 14px;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+    }
+
+    footer a {
+      color: #22c55e;
+      text-decoration: none;
+      transition: 0.3s;
+    }
+
+    footer a:hover {
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <div class="sidebar">
+    <a href="/" class="brand">Movie-Recommender</a>
+    <ul class="menu">
+      <li><a href="{% url 'index' %}"><i class="fa fa-house"></i> Home</a></li>
+      <li><a href="/admin/"><i class="fa fa-gear"></i> Admin</a></li>
+      <li><a href="{% url 'watch' %}"><i class="fa fa-list"></i> My List</a></li>
+      {% if not request.user.is_authenticated %}
+        <li><a href="{% url 'signup' %}"><i class="fa fa-user-plus"></i> Sign Up</a></li>
+        <li><a href="{% url 'login' %}"><i class="fa fa-right-to-bracket"></i> Login</a></li>
+      {% else %}
+        <li><a href="{% url 'logout' %}"><i class="fa fa-right-from-bracket"></i> Logout</a></li>
+      {% endif %}
+    </ul>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div class="main-header">
+      <h1>🎬 Movies</h1>
+
+      <!-- Search Form -->
+      <form method="get" action="{% url 'movie_list' %}" class="search-form">
+        <input
+          type="text"
+          name="q"
+          placeholder="Search movies..."
+          value="{{ q|default:'' }}"
+        />
+
+        <select name="category">
+          <option value="">All Categories</option>
+          {% for cat in categories %}
+            <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" or selected_category == cat.id %}selected{% endif %}>
+              {{ cat.name }}
+            </option>
+          {% endfor %}
+        </select>
+
+        <button type="submit">Search</button>
+      </form>
+    </div>
+
+    {% block body %}
+    <div class="card">
+      <h1>Welcome to Movie Recommender 🎬</h1>
+      <p>Discover, rate, and manage your favorite movies.</p>
+    </div>
+    {% endblock %}
+  </div>
+
+</body>
+</html>
