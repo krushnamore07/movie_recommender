@@ -97,6 +97,7 @@ def detail(request, movie_id):
     context = {
         'movies': movies,
         'movie_rating': movie_rating,
+        'stars': range(1, 6),
         'rate_flag': rate_flag,
         'update': update,
     }

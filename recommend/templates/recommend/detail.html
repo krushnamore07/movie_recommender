@@ -99,19 +99,13 @@
             <h3><small>Genre: {{ movies.genre }}</small></h3>
 
             <!-- Rating Form -->
-            <form method="post" action="{% url 'detail' movies.id %}" onsubmit="return validateForm()" name="ratingForm">
+            <form method="post" action="{% url 'detail' movies.id %}" name="ratingForm">
                 <div class="star-rating">
                     <span>Rate Movie:</span><br>
-                    <span class="fa fa-star-o" data-rating="1"></span>
-                    <span class="fa fa-star-o" data-rating="2"></span>
-                    <span class="fa fa-star-o" data-rating="3"></span>
-                    <span class="fa fa-star-o" data-rating="4"></span>
-                    <span class="fa fa-star-o" data-rating="5"></span>
-                    {% if rate_flag %}
-                        <input type="hidden" name="rating" class="rating-value" value="{{movie_rating}}">
-                    {% else %}
-                        <input type="hidden" name="rating" class="rating-value" value="0">
-                    {% endif %}
+                    {% for i in stars %}
+                        <span class="fa fa-star{% if movie_rating >= i %} active{% endif %}" data-rating="{{ i }}"></span>
+                    {% endfor %}
+                    <input type="hidden" name="rating" class="rating-value" value="{{ movie_rating|default:'0' }}">
                     {% csrf_token %}
                 </div>
                 <input type="submit" class="button" value="Submit">
