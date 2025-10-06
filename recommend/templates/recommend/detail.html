@@ -1,5 +1,5 @@
-{% extends 'recommend/base.html'%}
-{% block title %}{{movies.title}}{% endblock %}
+{% extends 'recommend/base.html' %}
+{% block title %}{{ movies.title }}{% endblock %}
 
 {% block body %}
 <style>
@@ -19,9 +19,7 @@
         box-shadow: 0 8px 25px rgba(0,0,0,0.5);
         transition: transform 0.3s;
     }
-    .movie-card:hover {
-        transform: scale(1.02);
-    }
+    .movie-card:hover { transform: scale(1.02); }
 
     .movie-card img {
         width: 260px;
@@ -29,64 +27,29 @@
         box-shadow: 0 5px 20px rgba(0,0,0,0.6);
     }
 
-    .movie-info h1 {
-        font-size: 2.2rem;
-        font-weight: bold;
-        margin-bottom: 10px;
-    }
-    .movie-info small {
-        font-size: 1rem;
-        color: #ccc;
-    }
+    .movie-info h1 { font-size: 2.2rem; font-weight: bold; margin-bottom: 10px; }
+    .movie-info small { font-size: 1rem; color: #ccc; }
 
-    /* Star rating */
-    .star-rating {
-        font-size: 1.8rem;
-        margin: 15px 0;
-        color: #555;
-        cursor: pointer;
-    }
-    .star-rating .fa {
-        transition: color 0.3s, transform 0.2s;
-    }
-    .star-rating .fa:hover,
-    .star-rating .fa.active {
-        color: #ffcc00;
-        transform: scale(1.2);
-    }
+    .star-rating { font-size: 1.8rem; margin: 15px 0; color: #555; cursor: pointer; }
+    .star-rating .fa { transition: color 0.3s, transform 0.2s; }
+    .star-rating .fa:hover, .star-rating .fa.active { color: #ffcc00; transform: scale(1.2); }
 
-    /* Buttons */
     .button {
-        background: #ff0057;
-        color: white;
-        border: none;
-        padding: 10px 20px;
-        margin-top: 15px;
-        border-radius: 30px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.3s ease;
+        background: #ff0057; color: white; border: none; padding: 10px 20px; margin-top: 15px;
+        border-radius: 30px; cursor: pointer; font-weight: bold; transition: all 0.3s ease;
     }
-    .button:hover {
-        background: #ff3366;
-        box-shadow: 0 5px 15px rgba(255,0,87,0.5);
-    }
+    .button:hover { background: #ff3366; box-shadow: 0 5px 15px rgba(255,0,87,0.5); }
 
-    .messages .alert {
-        margin-bottom: 20px;
-        border-radius: 10px;
-    }
+    .messages .alert { margin-bottom: 20px; border-radius: 10px; }
 </style>
 
 <div class="container mt-5">
     {% if messages %}
-        <ul class="messages">
-            {% for message in messages %}
-                <div class="alert alert-success text-center">
-                  <strong>✔</strong> {{message}}
-                </div>
-            {% endfor %}
-        </ul>
+        {% for message in messages %}
+            <div class="alert alert-success text-center">
+                <strong>✔</strong> {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
 
     <div class="movie-card">
@@ -99,14 +62,14 @@
             <h3><small>Genre: {{ movies.genre }}</small></h3>
 
             <!-- Rating Form -->
-            <form method="post" action="{% url 'detail' movies.id %}" name="ratingForm">
+            <form method="post" action="{% url 'detail' movies.id %}">
+                {% csrf_token %}
                 <div class="star-rating">
                     <span>Rate Movie:</span><br>
                     {% for i in stars %}
                         <span class="fa fa-star{% if movie_rating >= i %} active{% endif %}" data-rating="{{ i }}"></span>
                     {% endfor %}
-                    <input type="hidden" name="rating" class="rating-value" value="{{ movie_rating|default:'0' }}">
-                    {% csrf_token %}
+                    <input type="hidden" name="rating" class="rating-value" value="{{ movie_rating }}">
                 </div>
                 <input type="submit" class="button" value="Submit">
             </form>
@@ -128,4 +91,25 @@
         </div>
     </div>
 </div>
+
+<!-- Star rating JS -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const stars = document.querySelectorAll('.star-rating .fa');
+    const ratingInput = document.querySelector('.rating-value');
+    const currentRating = parseInt(ratingInput.value);
+
+    // highlight existing rating
+    for (let i = 0; i < currentRating; i++) stars[i].classList.add('active');
+
+    // click to set rating
+    stars.forEach((star, index) => {
+        star.addEventListener('click', function() {
+            ratingInput.value = index + 1;
+            stars.forEach(s => s.classList.remove('active'));
+            for (let i = 0; i <= index; i++) stars[i].classList.add('active');
+        });
+    });
+});
+</script>
 {% endblock %}
